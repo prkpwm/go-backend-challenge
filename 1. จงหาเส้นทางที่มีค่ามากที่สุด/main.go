@@ -20,25 +20,20 @@ func readTriangleFromFile(filePath string) ([][]int, error) {
     return triangle, nil
 }
 
+
 func calculateMaxPathSum(triangle [][]int) int {
     n := len(triangle)
-    pathSumMatrix := make([][]int, n)
 
-    for i := range pathSumMatrix {
-        pathSumMatrix[i] = make([]int, len(triangle[i]))
-    }
-
-    for i := 0; i < len(triangle[n-1]); i++ {
-        pathSumMatrix[n-1][i] = triangle[n-1][i]
-    }
-
+    // Start from the second last row and move upwards
     for i := n - 2; i >= 0; i-- {
         for j := 0; j < len(triangle[i]); j++ {
-            pathSumMatrix[i][j] = triangle[i][j] + max(pathSumMatrix[i+1][j], pathSumMatrix[i+1][j+1])
+            // Update the triangle in place by adding the max of the two possible paths
+            triangle[i][j] += max(triangle[i+1][j], triangle[i+1][j+1])
         }
     }
 
-    return pathSumMatrix[0][0]
+    // The top element now contains the maximum path sum
+    return triangle[0][0]
 }
 
 func max(a, b int) int {
