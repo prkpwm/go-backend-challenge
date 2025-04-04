@@ -1,69 +1,84 @@
+
 package main
 
 import (
-    "fmt"
-    "math"
-    "strings"
+	"fmt"
+	"math"
+	"strings"
 )
 
-func generatePossibleNumbers(encoded string, n int) [][]int {
-    results := make([][]int, 0)
+// Memoization to store results for (index, previous digit)
+var memo map[string][]int
 
-    var generate func(index int, current []int)
-    generate = func(index int, current []int) {
-        if index == n {
-            results = append(results, append([]int(nil), current...))
-            return
-        }
-        for i := 0; i <= 9; i++ {
-            if index == 0 || (encoded[index-1] == 'L' && current[index-1] > i) ||
-                (encoded[index-1] == 'R' && current[index-1] < i) ||
-                (encoded[index-1] == '=' && current[index-1] == i) {
-                generate(index+1, append(current, i))
-            }
-        }
-    }
+// Generate the minimum sum sequence using recursion and memoization
+func findMinSequence(encoded string, index, prevDigit, n int) []int {
+	// Base case: reached the end, return empty sequence
+	if index == n {
+		return []int{}
+	}
 
-    generate(0, []int{})
-    return results
+	// Create a unique key for memoization
+	key := fmt.Sprintf("%d-%d", index, prevDigit)
+	if val, found := memo[key]; found {
+		return val
+	}
+
+	// Store the minimum sequence found
+	minSum := math.MaxInt64
+	var minSeq []int
+
+	// Try all digits from 0 to 9
+	for digit := 0; digit <= 9; digit++ {
+		// Ensure the digit follows the encoded constraints
+		if index == 0 || 
+		   (encoded[index-1] == 'L' && prevDigit > digit) ||
+		   (encoded[index-1] == 'R' && prevDigit < digit) ||
+		   (encoded[index-1] == '=' && prevDigit == digit) {
+
+			// Recursively find the next best sequence
+			nextSeq := findMinSequence(encoded, index+1, digit, n)
+
+			// Calculate the sum of this sequence
+			totalSum := digit
+			for _, num := range nextSeq {
+				totalSum += num
+			}
+
+			// Update if we found a smaller sum sequence
+			if totalSum < minSum {
+				minSum = totalSum
+				minSeq = append([]int{digit}, nextSeq...)
+			}
+		}
+	}
+
+	// Store in memoization and return
+	memo[key] = minSeq
+	return minSeq
 }
 
-func findMinSumSequence(results [][]int) []int {
-    minSum := math.MaxInt64
-    var minSequence []int
-
-    for _, seq := range results {
-        sum := 0
-        for _, num := range seq {
-            sum += num
-        }
-        if sum < minSum {
-            minSum = sum
-            minSequence = seq
-        }
-    }
-
-    return minSequence
-}
-
+// Decode the encoded string into the smallest valid number
 func decode(encoded string) string {
-    n := len(encoded) + 1
-    results := generatePossibleNumbers(encoded, n)
-    minSequence := findMinSumSequence(results)
+	memo = make(map[string][]int) // Reset memoization
+	n := len(encoded) + 1
 
-    var builder strings.Builder
-    for _, num := range minSequence {
-        builder.WriteString(fmt.Sprintf("%d", num))
-    }
+	// Find the smallest valid sequence
+	minSeq := findMinSequence(encoded, 0, -1, n)
 
-    return builder.String()
+	// Convert the sequence to a string
+	var result strings.Builder
+	for _, num := range minSeq {
+		result.WriteString(fmt.Sprintf("%d", num))
+	}
+
+	return result.String()
 }
 
 func main() {
-    var encoded string
-    fmt.Print("input = ")
-    fmt.Scan(&encoded)
+	var encoded string
+	fmt.Print("input = ")
+	fmt.Scan(&encoded)
 
-    decoded := decode(encoded)
-    fmt.Printf("output = %s\n", decoded)
+	decoded := decode(encoded)
+	fmt.Printf("output = %s\n", decoded)
 }
