@@ -24,6 +24,14 @@ To compile and run the programs, use the following commands:
   cd "2.จับฉันให้ได้สิ ซ้าย-ขวา-เท่ากับ" & go run main.go
  ```
 #### For Program 3 – พาย ไฟ ได - Pie Fire Dire:
+##### REST API
  ```bash
   cd "3.พาย ไฟ ได - Pie Fire Dire" & go run main.go
  ```
+##### gRPC
+ ```bash
+  cd "3.พาย ไฟ ได - Pie Fire Dire"
+  protoc --go_out=path/to/protobuf/generated/code --go-grpc_out=path/to/protobuf/generated/code ./proto/meat.proto
+  go run server.go
+ ```
+

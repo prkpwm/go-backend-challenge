@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+option go_package = "go-grpc/proto";
+
+service MeatService {
+    rpc GetBeefSummary (Empty) returns (MeatSummary);
+}
+
+message Empty {}
+
+message MeatSummary {
+    map<string, int32> beef = 1;
+}
